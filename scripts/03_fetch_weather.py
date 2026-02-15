@@ -113,7 +113,7 @@ def fetch_weather_data():
         distances = []
         for station_id, dist in nearest:
             # Look up the triplet for this station_id
-            station_row = stations_df[stations_df['station_id'] == str(station_id)]
+            station_row = stations_df[stations_df['station_id'] == int(station_id)]
             if len(station_row) > 0:
                 triplet = station_row['station_triplet'].iloc[0]
                 station_triplets.append(triplet)

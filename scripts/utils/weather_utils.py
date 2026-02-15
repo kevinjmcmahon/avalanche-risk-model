@@ -55,7 +55,7 @@ def find_nearest_stations(lon: float, lat: float,
     distances = []
     for _, station in stations_df.iterrows():
         dist = haversine_distance(lon, lat, station['longitude'], station['latitude'])
-        distances.append((station['station_id'], dist))
+        distances.append((str(station['station_id']), dist))
     
     # Sort by distance and return top n
     distances.sort(key=lambda x: x[1])
