@@ -5,7 +5,8 @@ This script:
 1. Loads cleaned CAIC avalanche data
 2. Merges terrain features (elevation, slope, aspect)
 3. Merges weather features (snow, temp, wind)
-4. Creates final training dataset with all features
+4. Creates unique IDs based on location + timestamp
+5. Creates final training dataset with all features
 """
 
 import pandas as pd
@@ -65,6 +66,26 @@ def combine_features():
         suffixes=('', '_weather')
     )
     print(f"After weather merge: {len(df):,} rows")
+    
+    # Create truly unique IDs (CAIC IDs may be reused/duplicated)
+    print("\nCreating unique observation IDs...")
+    df['unique_id'] = df.apply(
+        lambda row: f"{row['Longitude']:.6f}_{row['latitude']:.6f}_{row['Date'].strftime('%Y%m%d_%H%M')}",
+        axis=1
+    )
+    
+    # Check for duplicates with new ID
+    duplicates = df.duplicated(subset=['unique_id']).sum()
+    print(f"True duplicates found: {duplicates}")
+    
+    if duplicates > 0:
+        # Keep first occurrence
+        df = df.drop_duplicates(subset=['unique_id'], keep='first').reset_index(drop=True)
+        print(f"Removed {duplicates} duplicate observations")
+    
+    # Replace Observation ID with unique ID
+    df['Observation ID'] = df['unique_id']
+    df = df.drop(columns=['unique_id'])
     
     # Select and order final columns
     final_columns = [
